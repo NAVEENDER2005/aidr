@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+.env
+
+# SQLite database
+backend/aidr.db
+backend/aidr.db-shm
+backend/aidr.db-wal
+
+# Uploaded images (runtime data)
+backend/uploads/
+
+# ML model weights (too large for git)
+backend/ml/model_weights.pth
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V3
+.Trashes
+*.swp
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env files
+.env
+.env.local
+.env.production
