@@ -7,10 +7,14 @@ import os
 import stat
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, 'aidr.db')
+DB_PATH = os.getenv("DB_PATH", os.path.join(BASE_DIR, 'aidr.db'))
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
-# Ensure DB file exists and is writable before SQLAlchemy connects
+# Ensure DB directory and file exists and is writable before SQLAlchemy connects
+db_dir = os.path.dirname(DB_PATH)
+if db_dir:
+    os.makedirs(db_dir, exist_ok=True)
+
 if not os.path.exists(DB_PATH):
     open(DB_PATH, 'w').close()
 os.chmod(DB_PATH, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH)

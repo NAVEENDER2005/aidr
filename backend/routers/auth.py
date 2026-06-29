@@ -7,8 +7,9 @@ import bcrypt
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import get_db, User
+import os
 
-SECRET_KEY = "aidr-secret-key-2024-retinopathy"
+SECRET_KEY = os.getenv("SECRET_KEY", "aidr-secret-key-2024-retinopathy")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 hours
 

@@ -21,7 +21,7 @@ STAGE_DESCRIPTIONS = {
 }
 
 MODEL_PATH  = os.path.join(os.path.dirname(__file__), "model_weights.pth")
-UPLOAD_DIR  = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+UPLOAD_DIR  = os.getenv("UPLOAD_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads"))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
