@@ -8,7 +8,7 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -49,6 +49,23 @@ def startup_event():
     print("[AIDR] Database initialised successfully.")
 
 
-@app.get("/api/health")
+@app.api_route("/", methods=["GET", "HEAD"])
+def root():
+    return {
+        "status": "online",
+        "system": "AI-DR Diabetic Retinopathy API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
+
+
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health():
     return {"status": "ok", "system": "AI-DR Detection"}
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(content="", media_type="image/x-icon", status_code=204)
+
