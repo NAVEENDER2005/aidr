@@ -37,7 +37,7 @@ export default function UploadPage() {
 
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('patient_name', patientName.trim() || 'Anonymous')
+    formData.append('patient_name', patientName.trim() || 'Anonymous Patient')
 
     try {
       setProgress(30)
@@ -50,7 +50,7 @@ export default function UploadPage() {
       setProgress(100)
       navigate(`/result/${res.data.id}`, { state: { result: res.data } })
     } catch (err) {
-      const detail = err.response?.data?.detail || err.message || 'Analysis failed. Please try again.'
+      const detail = err.response?.data?.detail || err.message || 'Diagnostic inference failed. Please check backend connection.'
       setError(detail)
       console.error('Predict error:', err.response?.data || err)
       setProgress(0)
@@ -70,26 +70,32 @@ export default function UploadPage() {
     <>
       <div className="page-header">
         <div>
-          <div className="page-title">New Analysis</div>
-          <div className="page-subtitle">Upload a retinal fundus image for DR detection</div>
+          <div className="page-title">New Retinal Screening</div>
+          <div className="page-subtitle">Upload digital fundus photography for neural network DR staging</div>
         </div>
       </div>
 
       <div className="page-body animate-fade-in">
-        <div style={{ maxWidth: 700, margin: '0 auto' }}>
+        <div style={{ maxWidth: 740, margin: '0 auto' }}>
 
           {/* Patient Name */}
           <div className="card mb-4">
             <div className="card-header">
-              <span className="card-title">👤 Patient Information</span>
+              <span className="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--sky-400)' }}>
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Patient Identification
+              </span>
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" htmlFor="patient-name">Patient Name (optional)</label>
+              <label className="form-label" htmlFor="patient-name">Patient Name or MRN (Medical Record Number)</label>
               <input
                 id="patient-name"
                 className="form-input"
                 type="text"
-                placeholder="e.g. Ravi Kumar"
+                placeholder="e.g. John Doe / MRN-84729"
                 value={patientName}
                 onChange={e => setPatientName(e.target.value)}
                 disabled={loading}
@@ -100,10 +106,17 @@ export default function UploadPage() {
           {/* Drop Zone */}
           <div className="card mb-4">
             <div className="card-header">
-              <span className="card-title">🖼️ Retinal Image</span>
+              <span className="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--sky-400)' }}>
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                  <circle cx="9" cy="9" r="2"/>
+                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                </svg>
+                Fundus Photography Upload
+              </span>
               {file && (
                 <button className="btn btn-secondary btn-sm" onClick={handleClear} disabled={loading}>
-                  ✕ Clear
+                  ✕ Replace Image
                 </button>
               )}
             </div>
@@ -111,19 +124,28 @@ export default function UploadPage() {
             {!preview ? (
               <div {...getRootProps()} className={`dropzone${isDragActive ? ' active' : ''}`} id="dropzone">
                 <input {...getInputProps()} id="file-input" />
-                <span className="dropzone-icon">👁️</span>
+                <div className="dropzone-icon" aria-hidden="true">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" style={{ margin: '0 auto', color: 'var(--sky-400)' }}>
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                  </svg>
+                </div>
                 <p className="dropzone-title">
-                  {isDragActive ? 'Drop the retinal image here…' : 'Drag & drop a retinal fundus image'}
+                  {isDragActive ? 'Release image file here' : 'Select or drag fundus scan image'}
                 </p>
-                <p className="dropzone-sub">or click to browse files</p>
-                <p className="dropzone-hint">Supports JPG, PNG, BMP, TIFF · Max 20 MB</p>
+                <p className="dropzone-sub">Supports standardized high-resolution retinal photography</p>
+                <p className="dropzone-hint">Formats: JPG, PNG, BMP, TIFF · Maximum size 20 MB</p>
               </div>
             ) : (
               <div className="upload-preview">
-                <img src={preview} alt="Preview of uploaded retinal image" />
+                <img src={preview} alt="Retinal fundus scan preview" />
                 <div className="upload-preview-footer">
-                  <span>📁 {file.name}</span>
-                  <span>{(file.size / 1024).toFixed(0)} KB</span>
+                  <span>📄 {file.name}</span>
+                  <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
                 </div>
               </div>
             )}
@@ -132,36 +154,47 @@ export default function UploadPage() {
           {/* Progress */}
           {loading && (
             <div className="card mb-4">
-              <div style={{ fontSize: '0.85rem', color: 'var(--slate-400)', marginBottom: 10 }}>
-                {progress < 30 ? '⚙️ Preparing image…'
-                  : progress < 60 ? '📤 Uploading…'
-                  : progress < 90 ? '🧠 Running EfficientNet inference…'
-                  : '🎨 Generating Grad-CAM heatmap…'}
+              <div style={{ fontSize: '0.85rem', color: 'var(--sky-300)', marginBottom: 10, fontWeight: 500 }}>
+                {progress < 30 ? 'Preprocessing image with CLAHE adaptive equalization…'
+                  : progress < 60 ? 'Streaming fundus tensor to backend…'
+                  : progress < 90 ? 'EfficientNet-B0 deep neural network inference in progress…'
+                  : 'Synthesizing Grad-CAM explainability heatmap…'}
               </div>
               <div className="confidence-bar-track">
                 <div className="confidence-bar-fill" style={{ width: `${progress}%` }} />
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', marginTop: 6, textAlign: 'right' }}>{progress}%</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--slate-400)', marginTop: 6, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                {progress}%
+              </div>
             </div>
           )}
 
           {error && (
-            <div className="login-error mb-4">⚠️ {error}</div>
+            <div className="login-error mb-4">
+              ⚠️ {error}
+            </div>
           )}
 
-          {/* Info Box */}
+          {/* Info Box (Clinical Precision, NO Purple) */}
           {!file && (
-            <div className="card mb-4" style={{ borderColor: 'rgba(124,58,237,0.3)', background: 'rgba(124,58,237,0.05)' }}>
-              <div className="card-title" style={{ marginBottom: 12 }}>ℹ️ How It Works</div>
-              <ol style={{ paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="card mb-4" style={{ borderColor: 'rgba(56, 189, 248, 0.22)', background: 'rgba(14, 165, 233, 0.04)' }}>
+              <div className="card-title" style={{ marginBottom: 12, color: 'var(--sky-300)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                Diagnostic Pipeline Overview
+              </div>
+              <ol style={{ paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[
-                  'Upload a high-quality retinal fundus image (colour photograph of the retina)',
-                  'The system applies CLAHE preprocessing to enhance contrast',
-                  'EfficientNet-B0 classifies the image into one of 5 DR severity stages',
-                  'Grad-CAM generates a heatmap highlighting affected regions',
-                  'Download a PDF report with all findings',
+                  'Upload calibrated color retinal photography centered on macula or optic disc',
+                  'CLAHE enhances microaneurysms, hemorrhages, and fine retinal vascularization',
+                  'EfficientNet-B0 extracts hierarchical spatial features across MBConv residual blocks',
+                  'Grad-CAM maps gradient activations to provide transparent explainability',
+                  'Generate and export tamper-evident clinical PDF screening report',
                 ].map((s, i) => (
-                  <li key={i} style={{ fontSize: '0.85rem', color: 'var(--slate-400)', lineHeight: 1.6 }}>{s}</li>
+                  <li key={i} style={{ fontSize: '0.84rem', color: 'var(--slate-300)', lineHeight: 1.6 }}>{s}</li>
                 ))}
               </ol>
             </div>
@@ -173,7 +206,7 @@ export default function UploadPage() {
             onClick={handleAnalyze}
             disabled={!file || loading}
           >
-            {!loading && '🧠 Analyse Retinal Image'}
+            {!loading && 'Run Neural DR Diagnostic Analysis'}
           </button>
         </div>
       </div>

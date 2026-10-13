@@ -28,7 +28,11 @@ if [ ! -d ".venv" ]; then
   $PYTHON -m venv .venv
 fi
 
-source .venv/bin/activate
+if [ -f ".venv/Scripts/activate" ]; then
+  source .venv/Scripts/activate
+elif [ -f ".venv/bin/activate" ]; then
+  source .venv/bin/activate
+fi
 
 echo "📦 Installing Python dependencies..."
 pip install --upgrade pip -q

@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy requirements and install dependencies
+# Copy requirements and install dependencies with CPU-only PyTorch (reduces image from 3.5GB to ~500MB)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 
 # Copy source code
 COPY . .
 
-# Expose port and start backend
+# Expose port and start backend respecting cloud host PORT variable
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]

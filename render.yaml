@@ -1,12 +1,35 @@
 services:
+  # 1. FastAPI Backend (Free Web Service)
   - type: web
     name: aidr-backend
     env: docker
     dockerfilePath: backend/Dockerfile
     dockerContext: backend
     plan: free
+    region: oregon
+    healthCheckPath: /api/health
     envVars:
+      - key: PORT
+        value: "8000"
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
         value: "*"
+
+  # 2. React + Vite Frontend (Free Static Site)
+  - type: static
+    name: aidr-frontend
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    plan: free
+    region: oregon
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: aidr-backend
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

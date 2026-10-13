@@ -1,7 +1,16 @@
+import os
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
 
 from database import init_db
 from routers import auth, predict, history
@@ -37,7 +46,7 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 @app.on_event("startup")
 def startup_event():
     init_db()
-    print("✅ Database initialised.")
+    print("[AIDR] Database initialised successfully.")
 
 
 @app.get("/api/health")
