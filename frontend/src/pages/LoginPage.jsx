@@ -23,7 +23,13 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(res.data.user))
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.detail || 'Authentication failed. Please verify credentials.')
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail)
+      } else if (err.code === 'ECONNABORTED' || err.message?.includes('Network Error')) {
+        setError('API server is connecting or waking up from sleep (Render free tier). Please wait 15–20 seconds and click again.')
+      } else {
+        setError(err.message || 'Authentication failed. Please verify credentials.')
+      }
     } finally {
       setLoading(false)
     }
